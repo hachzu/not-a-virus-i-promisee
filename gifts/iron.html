@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Iron</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poiret+One&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Poiret One', cursive;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      color: #48E591;
+    }
+
+    /* Fixed blurred background */
+    .bg {
+      position: fixed;
+      top: -40px;
+      left: -40px;
+      right: -40px;
+      bottom: -40px;
+      background: url('ironbg.jpg') center / cover no-repeat fixed;
+      filter: blur(15px) brightness(0.45);
+      z-index: -1;
+    }
+
+    /* Button */
+    .start-btn {
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: fit-content;
+      height: fit-content;
+      padding: 14px 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(72, 229, 145, 0.6);
+      background: rgba(2, 6, 23, 0.45);
+      color: #48E591;
+      font-size: 1.1rem;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: 
+        transform 0.4s ease,
+        box-shadow 0.4s ease,
+        opacity 0.6s ease;
+    }
+
+    .start-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 25px rgba(72, 229, 145, 0.4);
+    }
+
+    .start-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Text */
+    .text {
+      position: relative;
+      padding: 8vh 10vw;
+      font-size: 1.4rem;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      text-shadow: 0 0 16px rgba(72, 229, 145, 0.55);
+    }
+
+    /* cursor removed */
+    /* Skip button - subtle and pleasing */
+    .skip-btn {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(72,229,145,0.22);
+      background: rgba(2,6,23,0.32);
+      color: #bff5d9;
+      font-size: 0.95rem;
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .skip-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .skip-btn:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+
+  <div class="text" id="text"></div>
+  <button class="start-btn" id="startBtn">...</button>
+  <button class="skip-btn" id="skipBtn" aria-label="Skip typing">Skip</button>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const textEl = document.getElementById("text");
+
+    // keep a dedicated text node for typing
+    const textNode = document.createTextNode('');
+    textEl.appendChild(textNode);
+
+    // skip control and skip button
+    let skipRequested = false;
+    const skipBtn = document.getElementById('skipBtn');
+    function skipTyping() {
+      // close audio if running
+      if (audioCtx && typeof audioCtx.close === 'function') audioCtx.close().catch(()=>{});
+      audioCtx = null;
+      skipRequested = true;
+      // reveal full letter immediately
+      textNode.data = letter;
+      window.scrollTo(0, document.body.scrollHeight);
+      if (skipBtn) skipBtn.classList.remove('visible');
+    }
+    if (skipBtn) skipBtn.addEventListener('click', skipTyping);
+
+    const SPEEDS = { normal: 30, slow: 50 };
+
+    // WebAudio typing tick: created on first user gesture
+    let audioCtx = null;
+    function ensureAudio() {
+      if (audioCtx) return audioCtx;
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; }
+      return audioCtx;
+    }
+
+    function playTick(ch) {
+      const ctx = audioCtx;
+      if (!ctx) return;
+      // avoid sound for regular spaces; allow for newlines/punctuation
+      if (/\s/.test(ch) && ch !== '\n') return;
+      const now = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      // lower-pitched, softer ticks
+      let freq = 320 + Math.random() * 80;            // letters: ~320-400Hz
+      if (/[.,:;!?]/.test(ch)) freq = 220 + Math.random() * 60; // punctuation: ~220-280Hz
+      if (/\n/.test(ch)) freq = 160;                 // newline: lower tone
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq, now);
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(0.03, now + 0.006); // lower peak volume
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.14);
+    }
+
+    const letter = `this letter is for that person who really *loves* horses, a xiao simp, and is the most silly, yappy person i know.
+
+yes, you, iron.
+
+i know this isn’t much for a christmas present, but my words are all i have to give you right now ^^ i wish i could give you more, like a pile of gifts, or a world made out of your favorite things :p but for now, this letter is all i’ve got, and i really hope it counts for something.
+
+merry christmas, iron! wherever you are right now, whether you’re laughing with your family, teasing your friends, scrolling your phone, or just enjoying a quiet moment, i hope you’re having fun. really. i hope you’re soaking in every little thing today. i hope you’re collecting the best ones (ur moments) today :3
+
+you’re really strong, iron. i mean it. i know you are. you’ve been through so many things, some messy, some unfair, some i can’t even imagine, and yet you still come back, still try, still give care to people around you. and honestly, i admire that so much. you have a heart that refuses to give up on people, even when it should.
+
+you give so much care to your friends, to your parents, to the people around you, even when you yourself are tired, sad, or stressed. and you’ve taught me so much too, iron, even without meaning to. you’ve taught me patience, kindness, laughter in the smallest things, and that sometimes just existing, just being yourself, is enough for someone else to feel better. so thank you. thank you for being you. thank you for being the iron i know. for being caring, loving, silly, stubborn, and everything else that makes you you. whatever block of iron you came from, it shaped something really, really special. *inserts rgb iron ingot from minecraft*
+
+this year has been really, really great with you. i can’t even explain how much your presence has changed things for me. you’ve made the hard days lighter, the boring days fun, and even the confusing days somehow make sense. you’ve made me laugh in ways i didn’t expect, you’ve made me think in ways i didn’t know i could, and you’ve made me feel things i didn’t know i could feel. honestly, i don’t think i can put into words how grateful i am for that, but i’ll try anyway.
+
+even though we started as friends, became something more, and then went back to being friends again, i wouldn’t trade it for anything. every step of that path mattered, and i’m glad we didn’t completely lose each other. i’m glad we can still talk, still joke, still share stupid little moments in vcs and chats that probably make no sense to anyone else. i hope that if i ever hurt you, or if i was a bad person to you at times, it didn’t leave too many scars, because honestly, thinking about that makes me wish i could go back and do better, every single time.
+
+i also want to say this: you inspire me, iron. in ways i don’t even fully realize yet. you inspire me to be kinder, to try harder, to care more, and to laugh even when life’s a little messy. i catch myself thinking, “what would iron do?” more often than i’d like to admit, and it’s because of you that i’m trying to be a better person, even if it’s slow, clumsy, and awkward.
+
+and i just love that we have all these little things that are ours. your laugh, your random comments, the way you get excited over small things, your ridiculous silly faces, the way you care too much sometimes, the way you get teased, your xiao obsession, and yes, even your love for horses. it all makes you so iron, and i wouldn’t want it any other way. honestly, i don’t think anyone could be you better than you.
+
+so here’s me, trying to give back a little of what you give me every day!! a letter that’s all mine, full of words that are trying to say thank you. thank you for existing. thank you for being the person who’s changed my world, even in small ways, even in big ways. thank you for being my friend, for being silly with me, for laughing at my stupid jokes, for letting me be part of your life.
+
+merry christmas again, iron. i hope today is alright for you (ofc it doesn't have to be perfect), full of laughter, love, warmth, and tiny little moments that make you smile long after today ends. you deserve every bit of happiness in the world, and i hope somehow, in my small way, i’ve made a little space for it in your life too. 
+
+love, hazu <3
+`;
+
+    // split the editable template into paragraphs (keeps the source easy to edit)
+    const rawText = letter.split('\n\n').map(p => ({ text: p + '\n\n', speed: 'normal' }));
+    // small tweak: make the opening paragraph a bit slower
+    if (rawText[0]) rawText[0].speed = 'slow';
+    if (rawText[11]) rawText[11].speed = 'slow';
+    if (rawText[12]) rawText[12].speed = 'slow';
+
+    function typeWriter(arr, index = 0, charIndex = 0) {
+      if (skipRequested) return;
+      if (index >= arr.length) {
+        if (skipBtn) skipBtn.classList.remove('visible');
+        return;
+      }
+
+      const part = arr[index];
+      if (charIndex < part.text.length) {
+        const ch = part.text.charAt(charIndex);
+        if (skipRequested) return;
+        textNode.data += ch;
+        // sound per character (if audio initialized)
+        playTick(ch);
+        // keep the page scrolled to the bottom as content grows
+        window.scrollTo(0, document.body.scrollHeight);
+        // add pauses after punctuation to improve pacing
+        let delay = SPEEDS[part.speed];
+        if (ch === '.') delay += 850;            // longer pause after period
+        else if (ch === '?' || ch === '!') delay += 400; // question/exclamation pause
+        else if (ch === ',') delay += 400;      // short pause for commas
+        else if (ch === ';' || ch === ':') delay += 400; // medium pause for semicolon/colon
+        setTimeout(() => typeWriter(arr, index, charIndex + 1), delay);
+      } else {
+        setTimeout(() => typeWriter(arr, index + 1, 0), 400);
+      }
+    }
+
+    startBtn.addEventListener("click", async () => {
+      startBtn.classList.add("hidden");
+      // show skip button
+      if (skipBtn) skipBtn.classList.add('visible');
+      // initialize/resume audio on user gesture
+      const ctx = ensureAudio();
+      if (ctx && ctx.state === 'suspended') await ctx.resume();
+      typeWriter(rawText);
+    });
+  </script>
+
+</body>
+</html>

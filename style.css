@@ -1,0 +1,222 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, h1, p {
+  font-family: 'Delius', cursive;
+}
+
+body {
+  height: 100vh;
+
+  background-image: url('assets/background.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: overlay;
+  background-color: rgba(2, 6, 23, 0.45);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* GIFT */
+.gift-wrapper {
+  cursor: pointer;
+}
+
+.gift {
+  width: 180px;
+  display: block;
+
+  animation: idleFloat 3.5s ease-in-out infinite;
+
+  transition:
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.6s ease;
+}
+
+/* hover scale + shape-aware glow */
+.gift-wrapper:hover .gift {
+  transform: scale(1.15);
+  filter:
+    drop-shadow(0 0 10px rgba(255, 255, 255, 0.6))
+    drop-shadow(0 0 22px rgba(255, 255, 255, 0.35));
+}
+
+/* floating animation */
+@keyframes idleFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0); }
+}
+
+/* TEXT UNDER GIFT */
+.popup-text {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  color: white;
+  opacity: 0;
+  transform: translateY(18px) scale(0.95);
+  animation: popIn 0.9s cubic-bezier(0.22, 1.4, 0.36, 1) forwards;
+  animation-delay: 0.4s;
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: translateY(24px) scale(0.9); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: rgba(15, 23, 42, 0.95);
+  padding: 30px 26px;
+  border-radius: 18px;
+  width: 320px;
+  text-align: center;
+  color: white;
+
+  animation: modalPop 0.6s cubic-bezier(0.22, 1.4, 0.36, 1);
+}
+
+.modal-content h2 {
+  margin-bottom: 16px;
+}
+
+/* inputs + button */
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Delius', cursive;
+}
+
+.modal-content button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Delius', cursive;
+}
+
+.error-text {
+  color: #ff9a9a;
+  font-size: 0.9rem;
+  min-height: 1em;
+}
+
+/* modal pop animation */
+@keyframes modalPop {
+  0% { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* AUTOCOMPLETE */
+.autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.suggestions {
+  position: absolute;
+  top: 105%;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 20;
+  animation: popIn 0.35s ease forwards;
+}
+
+.suggestions div {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.suggestions div:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.suggestions.hidden {
+  display: none;
+}
+
+/* OPEN GIFT BUTTON */
+.open-btn {
+  margin-top: 18px;
+  padding: 12px 26px;
+  font-family: 'Delius', cursive;
+  font-size: 1rem;
+  color: #020617;
+  background: white;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    background 0.35s ease;
+}
+
+/* hover = gentle lift */
+.open-btn:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow:
+    0 10px 25px rgba(255, 255, 255, 0.35);
+}
+
+/* click = press + pop */
+.open-btn:active {
+  transform: scale(0.92);
+  box-shadow:
+    0 0 0 rgba(255, 255, 255, 0);
+}
+
+/* optional "processing" animation */
+.open-btn.loading {
+  pointer-events: none;
+  animation: buttonPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes buttonPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+.open-btn {
+  -webkit-tap-highlight-color: transparent;
+}

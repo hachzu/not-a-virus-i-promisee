@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sketch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'DynaPuff', cursive;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      color: #cdb1ec;
+    }
+
+    /* Fixed blurred background */
+    .bg {
+      position: fixed;
+      top: -40px;
+      left: -40px;
+      right: -40px;
+      bottom: -40px;
+      background: url('sketchbg.jpg') center / cover no-repeat fixed;
+      filter: blur(20px) brightness(0.30);
+      z-index: -1;
+    }
+
+    /* Button */
+    .start-btn {
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: fit-content;
+      height: fit-content;
+      padding: 14px 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(131, 108, 161, 0.753);
+      background: rgba(2, 6, 23, 0.45);
+      color: rgba(131, 86, 189, 0.753);
+      font-size: 1.1rem;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: 
+        transform 0.4s ease,
+        box-shadow 0.4s ease,
+        opacity 0.6s ease;
+    }
+
+    .start-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 25px rgba(131, 86, 189, 0.753);
+    }
+
+    .start-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Text */
+    .text {
+      position: relative;
+      padding: 8vh 10vw;
+      font-size: 1.1rem;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      text-shadow: 0 0 16px rgba(131, 86, 189, 1);
+    }
+
+    /* cursor removed */
+    /* Skip button - subtle and pleasing */
+    .skip-btn {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(89, 7, 136, 0.22);
+      background: rgba(2,6,23,0.32);
+      color: #cc6be4;
+      font-size: 0.95rem;
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .skip-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .skip-btn:hover { transform: translateY(-2px); }
+    
+    /* Inserted image placeholder styling */
+    .inserted-img {
+      display: block;
+      margin: 18px auto;
+      max-width: 92%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+      opacity: 0;
+      transition: opacity 360ms ease, transform 360ms ease;
+      transform: translateY(6px);
+    }
+    .inserted-img.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+
+  <div class="text" id="text"></div>
+  <button class="start-btn" id="startBtn">...</button>
+  <button class="skip-btn" id="skipBtn" aria-label="Skip typing">Skip</button>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const textEl = document.getElementById("text");
+
+    // keep a dedicated text node for typing (use `let` so we can switch nodes)
+    let textNode = document.createTextNode('');
+    textEl.appendChild(textNode);
+
+    // skip control and skip button
+    let skipRequested = false;
+    const skipBtn = document.getElementById('skipBtn');
+    function skipTyping() {
+      // close audio if running
+      if (audioCtx && typeof audioCtx.close === 'function') audioCtx.close().catch(()=>{});
+      audioCtx = null;
+      skipRequested = true;
+      // reveal full letter immediately
+      textNode.data = letter;
+      window.scrollTo(0, document.body.scrollHeight);
+      if (skipBtn) skipBtn.classList.remove('visible');
+    }
+    if (skipBtn) skipBtn.addEventListener('click', skipTyping);
+
+    const SPEEDS = { normal: 30, slow: 50 };
+
+    // WebAudio typing tick: created on first user gesture
+    let audioCtx = null;
+    function ensureAudio() {
+      if (audioCtx) return audioCtx;
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; }
+      return audioCtx;
+    }
+
+    function playTick(ch) {
+      const ctx = audioCtx;
+      if (!ctx) return;
+      // avoid sound for regular spaces; allow for newlines/punctuation
+      if (/\s/.test(ch) && ch !== '\n') return;
+      const now = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      // lower-pitched, softer ticks
+      let freq = 320 + Math.random() * 80;            // letters: ~320-400Hz
+      if (/[.,:;!?]/.test(ch)) freq = 220 + Math.random() * 60; // punctuation: ~220-280Hz
+      if (/\n/.test(ch)) freq = 160;                 // newline: lower tone
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq, now);
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(0.03, now + 0.006); // lower peak volume
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.14);
+    }
+
+    // insert an image anywhere inside the `letter` text using the
+    // placeholder token format:
+    // [[IMG:filename.png|width|height|alt text]]
+    // - filename.png  : path relative to this HTML file (or absolute URL)
+    // - width         : e.g. 320 or 50% or auto (leave blank for default)
+    // - height        : e.g. 200 or auto (leave blank for default)
+    // - alt text      : optional alt text (no pipes allowed)
+    // Example inside the text: "...and then i drew this [[IMG:sketch.png|320|auto|sketch]] and kept writing."
+
+    const letter =
+  ` test
+  test
+  test
+
+[[IMG:sketchpoint.png|50|50|asketch point]]
+
+
+test
+test
+
+`;
+
+    // split the editable template into paragraphs (keeps the source easy to edit)
+    const rawText = letter.split('\n\n').map(p => ({ text: p + '\n\n', speed: 'normal' }));
+    // small tweak: make the opening paragraph a bit slower
+    if (rawText[0]) rawText[0].speed = 'slow';
+
+    function typeWriter(arr, index = 0, charIndex = 0) {
+      if (skipRequested) return;
+      if (index >= arr.length) {
+        if (skipBtn) skipBtn.classList.remove('visible');
+        return;
+      }
+
+      const part = arr[index];
+      if (charIndex < part.text.length) {
+        // detect image placeholder at current position
+        const remaining = part.text.slice(charIndex);
+        const imgMatch = remaining.match(/^\[\[IMG:([^\|\]]+)(?:\|([^\|\]]*))?(?:\|([^\|\]]*))?(?:\|([^\]]*))?\]\]/);
+        if (imgMatch) {
+          // imgMatch groups: [full, src, width, height, alt]
+          const [full, src, w, h, alt] = imgMatch;
+          // insert image element inline at the current typing position
+          const img = document.createElement('img');
+          img.className = 'inserted-img';
+          img.src = src.trim();
+          if (w && w.trim()) img.style.width = w.trim();
+          if (h && h.trim()) img.style.height = h.trim();
+          if (alt && alt.trim()) img.alt = alt.trim();
+          else img.alt = '';
+          // place the image immediately after the current text node
+          const afterNode = textNode.nextSibling;
+          textEl.insertBefore(img, afterNode);
+          // create a new text node after the image to receive subsequent typing
+          const newTextNode = document.createTextNode('');
+          textEl.insertBefore(newTextNode, img.nextSibling);
+          // switch typing target to the new node so future characters go after the image
+          textNode = newTextNode;
+          // animate in once loaded (or immediately)
+          img.addEventListener('load', () => img.classList.add('visible'));
+          setTimeout(() => img.classList.add('visible'), 200);
+          // advance charIndex past the marker and continue
+          const skipLen = full.length;
+          setTimeout(() => typeWriter(arr, index, charIndex + skipLen), 50);
+          return;
+        }
+
+        const ch = part.text.charAt(charIndex);
+        if (skipRequested) return;
+        textNode.data += ch;
+        // sound per character (if audio initialized)
+        playTick(ch);
+        // keep the page scrolled to the bottom as content grows
+        window.scrollTo(0, document.body.scrollHeight);
+        // add pauses after punctuation to improve pacing
+        let delay = SPEEDS[part.speed];
+        if (ch === '.') delay += 850;            // longer pause after period
+        else if (ch === '?' || ch === '!') delay += 400; // question/exclamation pause
+        else if (ch === ',') delay += 400;      // short pause for commas
+        else if (ch === ';' || ch === ':') delay += 400; // medium pause for semicolon/colon
+        setTimeout(() => typeWriter(arr, index, charIndex + 1), delay);
+      } else {
+        setTimeout(() => typeWriter(arr, index + 1, 0), 400);
+      }
+    }
+
+    startBtn.addEventListener("click", async () => {
+      startBtn.classList.add("hidden");
+      // show skip button
+      if (skipBtn) skipBtn.classList.add('visible');
+      // initialize/resume audio on user gesture
+      const ctx = ensureAudio();
+      if (ctx && ctx.state === 'suspended') await ctx.resume();
+      typeWriter(rawText);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>???</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Delius&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container">
+    <div class="gift-wrapper" id="giftBox">
+      <img src="assets/gift.png" alt="Gift" class="gift">
+    </div>
+
+    <p class="popup-text" id="giftText">You have a gift!</p>
+  </div>
+
+  <!-- GIFT MODAL -->
+  <div class="modal hidden" id="giftModal">
+    <div class="modal-content">
+      <h2 id="modalGreeting">Before we begin, let's identify you first!</h2>
+
+      <!-- NAME INPUT WITH AUTOCOMPLETE -->
+      <div class="autocomplete">
+        <input
+          type="text"
+          id="nameInput"
+          placeholder="Type your name!"
+          autocomplete="off"
+        >
+        <div class="suggestions hidden" id="nameSuggestions"></div>
+      </div>
+
+      <!-- PASSWORD INPUT -->
+      <input
+        type="password"
+        id="passwordInput"
+        placeholder="What's the secret code I gave you? ^^">
+
+      <p class="error-text" id="errorText"></p>
+
+      <!-- SUBMIT BUTTON -->
+      <button id="submitGift" class="open-btn">Open My Gift</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
