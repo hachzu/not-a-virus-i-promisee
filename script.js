@@ -53,7 +53,7 @@ const giftPasswords = {
   Lya: "password15",
   Kaya: "password16",
   Remuwel: "password17",
-  Azzy: "password18",
+  Azzy: "orfevrelover",
   Axo: "password19",
   Tiz: "password20",
   Kaz: "password21",
@@ -148,3 +148,4 @@ submitBtn.addEventListener('click', () => {
   const pageName = enteredName.toLowerCase();
   window.location.href = `gifts/${pageName}.html`;
 });
+
