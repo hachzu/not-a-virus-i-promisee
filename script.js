@@ -36,7 +36,7 @@ const allowedNames = [
    do not share it and do not open others' gift pages without permission)
    =============================== */
 const giftPasswords = {
-  Iron: "password1",
+  Iron: "crispyamericanseaweed",
   Suzy: "password2",
   Robert: "password3",
   Bryan: "password4",
