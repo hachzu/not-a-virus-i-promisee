@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>cullenuwu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Annie-Use-Your-Telescope:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --main-text: #a10904;
+      --glow: rgb(167, 58, 31);
+
+      --button-border: #dd0a0a;
+      --button-text: rgb(236, 67, 16);
+      --button-glow: rgba(255, 0, 0, 0.753);
+      --button-bg: rgba(29, 19, 18, 0.37);
+
+      --skip-border: rgba(255, 0, 0, 0.233);
+      --skip-bg: rgba(236, 240, 16, 0);
+      --skip-text: #dd5e15;
+
+      --bg-brightness: 0.40;
+      --bg-blur: 13px;
+
+      --img-shadow: rgba(236, 104, 104, 0.747);
+      --font-size: 2.0rem;
+      --font-ui: "Annie Use Your Telescope", cursive;
+    }
+
+
+    .special-word {
+    color: #ffffff; 
+    text-shadow: 0 0 12px #ffffff; 
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Annie Use Your Telescope", cursive;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      color: var(--main-text);
+    }
+
+    .bg {
+      position: fixed;
+      top: -40px;
+      left: -40px;
+      right: -40px;
+      bottom: -40px;
+      background: url('cullenbg.png') center / cover no-repeat fixed;
+      filter: blur(var(--bg-blur)) brightness(var(--bg-brightness));
+      z-index: -1;
+      will-change: transform;
+      transition: transform 0.15s ease-out;
+    }
+
+    .start-btn {
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: fit-content;
+      height: fit-content;
+      padding: 14px 36px;
+      border-radius: 999px;
+      border: 1px solid var(--button-border);
+      background: var(--button-bg);
+      color: var(--button-text);
+      font-size: 1.1rem;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.6s ease;
+       font-family: var(--font-ui);
+    }
+
+    .start-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 25px var(--button-glow);
+    }
+
+    .start-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .text {
+      position: relative;
+      padding: 8vh 10vw;
+      font-size: var(--font-size);
+      line-height: 1.9;
+      white-space: pre-wrap;
+      text-shadow: 0 0 16px var(--glow);
+    }
+
+    .char {
+      opacity: 0;
+      animation: fadeChar 0.4s ease forwards;
+    }
+
+    @keyframes fadeChar {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .skip-btn {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--skip-border);
+      background: var(--skip-bg);
+      color: var(--skip-text);
+      font-size: 0.8rem;
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .skip-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .skip-btn:hover { transform: translateY(-2px); }
+    
+    .inserted-img {
+      display: block;
+      margin: 18px auto;
+      max-width: 92%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 6px 24px var(--img-shadow);
+      opacity: 0;
+      transition: opacity 360ms ease, transform 360ms ease;
+      transform: translateY(6px);
+    }
+
+    .inserted-img.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+
+  <div class="text" id="text"></div>
+  <button class="start-btn" id="startBtn">Start</button>
+  <button class="skip-btn" id="skipBtn" aria-label="Skip typing">Skip (may cause issues!)</button>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const textEl = document.getElementById("text");
+    const bg = document.querySelector('.bg');
+
+    let textNode = document.createTextNode('');
+    textEl.appendChild(textNode);
+
+    let skipRequested = false;
+    const skipBtn = document.getElementById('skipBtn');
+
+    function skipTyping() {
+  if (audioCtx && typeof audioCtx.close === 'function') audioCtx.close().catch(()=>{});
+  audioCtx = null;
+  skipRequested = true;
+
+  // clear everything
+  textEl.innerHTML = '';
+
+  // split by newlines to preserve them
+  const lines = letter.split('\n');
+
+  lines.forEach(line => {
+    // check for image insertion
+    const imgMatch = line.match(/\[\[IMG:([^\|\]]+)(?:\|([^\|\]]*))?(?:\|([^\|\]]*))?(?:\|([^\]]*))?\]\]/);
+    if (imgMatch) {
+      const [full, src, w, h, alt] = imgMatch;
+      const img = document.createElement('img');
+      img.className = 'inserted-img';
+      img.src = src.trim();
+      if (w && w.trim()) img.style.width = w.trim();
+      if (h && h.trim()) img.style.height = h.trim();
+      img.alt = alt?.trim() || '';
+      textEl.appendChild(img);
+      setTimeout(() => img.classList.add('visible'), 50);
+
+      // remove the image code from the line
+      line = line.replace(full, '');
+    }
+
+    // append the remaining text as a text node
+    if (line.length > 0) {
+      const textNode = document.createTextNode(line);
+      textEl.appendChild(textNode);
+    }
+
+    // add a newline (preserved by pre-wrap)
+    textEl.appendChild(document.createElement('br'));
+  });
+
+  window.scrollTo(0, document.body.scrollHeight);
+  if (skipBtn) skipBtn.classList.remove('visible');
+}
+
+
+    if (skipBtn) skipBtn.addEventListener('click', skipTyping);
+
+    const SPEEDS = { normal: 35, slow: 60 };
+
+    let audioCtx = null;
+    function ensureAudio() {
+      if (audioCtx) return audioCtx;
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; }
+      return audioCtx;
+    }
+
+    function playTick(ch) {
+      const ctx = audioCtx;
+      if (!ctx) return;
+      if (/\s/.test(ch) && ch !== '\n') return;
+      const now = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      let freq = 180 + Math.random() * 80;
+      if (/[.,:;!?]/.test(ch)) freq = 200 + Math.random() * 60;
+      if (/\n/.test(ch)) freq = 160;
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq, now);
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(0.50, now + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.14);
+    }
+
+    const letter = `
+hi, cully or cunning. just kidding, hi cullen!! i know you wouldn’t have expected this, so yeah, expect the unexpected.
+
+anyway, {{special}}happy new year, cullen.{{/special}} meeting you this year was genuinely one of the nicer surprises. it was fun, it was eventful, and it definitely wasn’t on my bucket list that i’d end up having a close friend who i’d go on laag with and do projects with in such a short amount of time. but here we are.
+
+and honestly, i’m really glad you chose computer science. i know that’s not what most people would expect from you once they get to know your true nature, but that’s kind of what makes it cool. you’re proof that people don’t have to fit into neat little boxes, and i like that about you.
+
+you’re just really nice to be around. you’re {{special}}innocent yet chaotic{{/special}} in the most harmless, chill way possible. like, you somehow manage to be calm and unserious at the same time, and it works. i mean that in the best way, i promise.
+
+also, i will never forget all the free stuff and help you’ve given me. the libres, the laag, the project help, all of it. i don’t take that lightly. it meant a lot, and it made things easier when they could’ve been way more stressful. i might not always show it properly, but i really am grateful. and yeah, in whatever way i can, i’ll return the favor someday.
+
+more than that though, i appreciate you as a person. the way you’re kind without making a big deal about it, the way you’re just… there when people need help. it’s subtle, but it matters. it’s the kind of thing that makes someone quietly important in a group.
+
+{{special}}i’m really glad you’re my friend, cullen.{{/special}} i don’t get tired of having you around, and i don’t think i ever will. thanks for being part of my year, part of my circle, and part of the memories i’ll probably look back on and smile at.
+
+here’s to more laag trips, more dumb moments, more finished projects, and more random conversations that somehow go nowhere and everywhere at the same time!!
+
+[[IMG:cullengroupie.png|auto|auto|cullen group pic]]
+
+- lance <3
+`
+    const rawText = letter.split('\n\n').map(p => ({ text: p + '\n\n', speed: 'normal' }));
+    if (rawText[0]) rawText[0].speed = 'slow';
+
+
+let special = false;
+
+function typeWriter(arr, index = 0, charIndex = 0) {
+  if (skipRequested) return;
+  if (index >= arr.length) {
+    if (skipBtn) skipBtn.classList.remove('visible');
+    return;
+  }
+
+  const part = arr[index];
+
+  if (charIndex < part.text.length) {
+    let remaining = part.text.slice(charIndex);
+
+    // Handle image tags first
+    if (remaining.startsWith('[[IMG:')) {
+      const imgMatch = remaining.match(/^\[\[IMG:([^\|\]]+)(?:\|([^\|\]]*))?(?:\|([^\|\]]*))?(?:\|([^\]]*))?\]\]/);
+      if (imgMatch) {
+        const [full, src, w, h, alt] = imgMatch;
+        const img = document.createElement('img');
+        img.className = 'inserted-img';
+        img.src = src.trim();
+        if (w && w.trim()) img.style.width = w.trim();
+        if (h && h.trim()) img.style.height = h.trim();
+        img.alt = alt?.trim() || '';
+        textEl.appendChild(img);
+        setTimeout(() => img.classList.add('visible'), 50);
+
+        // skip the image tag in text
+        charIndex += full.length;
+        setTimeout(() => typeWriter(arr, index, charIndex), 50);
+        return;
+      }
+    }
+
+    // Handle opening special tag
+    if (remaining.startsWith('{{special}}')) {
+      special = true;
+      charIndex += '{{special}}'.length; // skip marker completely
+      remaining = part.text.slice(charIndex);
+    }
+
+    // Handle closing special tag
+    if (remaining.startsWith('{{/special}}')) {
+      special = false;
+      charIndex += '{{/special}}'.length; // skip marker completely
+      remaining = part.text.slice(charIndex);
+    }
+
+    // Check if we're past the end of the part after skipping tags
+    if (charIndex >= part.text.length) {
+      setTimeout(() => typeWriter(arr, index + 1, 0), 400);
+      return;
+    }
+
+    // Type character
+    const ch = part.text.charAt(charIndex);
+    const span = document.createElement('span');
+    span.className = 'char';
+    if (special) span.classList.add('special-word'); 
+    span.textContent = ch;
+    textEl.appendChild(span);
+
+    playTick(ch);
+    window.scrollTo(0, document.body.scrollHeight);
+
+    let delay = SPEEDS[part.speed];
+    if (ch === '.') delay += 850;
+    else if (ch === '?' || ch === '!') delay += 400;
+    else if (ch === ',' || ch === ';' || ch === ':') delay += 400;
+
+    setTimeout(() => typeWriter(arr, index, charIndex + 1), delay);
+  } else {
+    setTimeout(() => typeWriter(arr, index + 1, 0), 400);
+  }
+}
+
+
+    startBtn.addEventListener("click", async () => {
+      startBtn.classList.add("hidden");
+      if (skipBtn) skipBtn.classList.add('visible');
+      const ctx = ensureAudio();
+      if (ctx && ctx.state === 'suspended') await ctx.resume();
+      typeWriter(rawText);
+    });
+
+    document.addEventListener('mousemove', e => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 35;
+      const y = (e.clientY / window.innerHeight - 0.5) * 35;
+      bg.style.transform = `translate(${x}px, ${y}px)`;
+    });
+
+  </script>
+
+</body>
+</html>

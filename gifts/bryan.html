@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bryan</title>
+  <title>gluttonous man</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Abel:wght@400;700&display=swap" rel="stylesheet">
@@ -26,12 +26,13 @@
 
       --img-shadow: rgba(240, 239, 238, 0.747);
       --font-size: 2.0rem;
+      --font-ui: "Abel", cursive;
     }
 
 
     .special-word {
-    color: #ff0000; 
-    text-shadow: 0 0 12px #ff0000; 
+    color: #000000; 
+    text-shadow: 0 0 12px #ffffff; 
     }
 
     * {
@@ -76,6 +77,7 @@
       cursor: pointer;
       backdrop-filter: blur(8px);
       transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.6s ease;
+       font-family: var(--font-ui);
     }
 
     .start-btn:hover {
@@ -151,7 +153,7 @@
   <div class="bg"></div>
 
   <div class="text" id="text"></div>
-  <button class="start-btn" id="startBtn">...</button>
+  <button class="start-btn" id="startBtn">Start</button>
   <button class="skip-btn" id="skipBtn" aria-label="Skip typing">Skip (may cause issues!)</button>
 
   <script>
@@ -233,40 +235,35 @@
       o.type = 'sine';
       o.frequency.setValueAtTime(freq, now);
       g.gain.setValueAtTime(0.0001, now);
-      g.gain.linearRampToValueAtTime(0.10, now + 0.006);
+      g.gain.linearRampToValueAtTime(0.50, now + 0.006);
       g.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
       o.connect(g); g.connect(ctx.destination);
       o.start(now); o.stop(now + 0.14);
     }
 
     const letter = `
-hi rob, you just clicked on a link that can give me access to your computer, {{special}}and will probably retrieve your passwords and be sent to me.{{/special}}
+... look, i know i could’ve done this better in terms of coding, but i rushed it in like a week so it might look a bit scrappy. sorry if it’s disappointing 😭 you probably thought that “start” button was the start of a game LMAO.
 
-just kidding lol. well anyways,
+originally, i wanted this to be more interactive, but i couldn’t figure out how to pull that off properly in time, so this is what i have now. i can’t exactly learn object-oriented programming in html and css in one week, but hey, i tried. and that counts for something. i hope you still like it bro :)
 
-happy new year, robert!! and while i know this is one of those niche letters i barely do, i still wanted to make this for you, because you are my genuine friend and i appreciate you a lot since we've been friends.
+but anyways!! {{special}}happy new years,{{/special}} bryan!! this year was actually insane. ending shs, starting college, the almost daily gaming sessions and late nights, grinding projects together, random drama, all of it. it was chaotic in a way that somehow worked.
 
-[[IMG:robertdon.png|150|150|Robert peak]]
+i feel like we really bonded this year, and i appreciate you being there for me and the others. you’re not what i thought you were before, and i mean that in the best way. getting to know the real you was a pleasant surprise. you’re genuinely chill, kind, and easy to be around, and we all see that. of course, we’re not forgetting the {{special}}gluttonous{{/special}} you. your dedication to food is unmatched and honestly impressive.
 
-you are probably enjoying canto 9 right now, so i hope you are having a great time with it. idk, you probably finished it by now 😭 get a life twin (jk).
+you’ve also pushed me more into programming and game dev than you probably realize. every time you start yapping about tech stuff, my brain just goes, “damn… i should know more.” it makes me want to do better, learn more, and take this seriously. so yeah, keep being a nerd. it’s a good thing. and i’m glad you’re getting more outgoing lately too, because bro… your room is not the only place on earth.
 
-but yeah, thank you for being such a great friend to me, for all the libres and free food you have given us, and for letting us crash at your parent’s office. that was peak. i notice and appreciate everything you have done for me and the others, and i hope you know that. every small thing you do, whether it is sharing something or just being around, adds so much to our group, and i want you to see that your efforts never go unnoticed.
+but yeah. we’re glad to be your friend. i’m glad to be your friend. you’ve helped me out a lot, academically, with advice, and even just through your random generosity with food and stuff. it means more than i usually say, so i’m saying it now. thank you, mr. bryan.
 
-you are a great person, robert, and i hope you always remember that. you deserve all the good things in life, and i hope you get every single one of them. your kindness, your patience, and even the random chaotic energy you bring is something rare and special. honestly, i am really glad i met you, and sometimes i still think about how funny it is that it all started because i accidentally greeted you a happy birthday thinking you were someone else. that tiny mix-up somehow turned into one of the best friendships i could have asked for, and i am so thankful for it.
+i’m not gonna dump a whole list of wishes on you, but i do want this year to be kind to you. and if last year wasn’t, then yeah, remember what roland said: "{{special}}That’s that, and this is this.{{/special}}" what happened already happened. now we just focus on what we do with what’s in front of us.
 
-this year was truly something else, with all the deadlines, academics, and drama we had to go through. damn bro, i could not have made it without all of you, especially with the new friend groups we formed, public quest and coco’s harem. all the chaos, the laughs, the small victories, the random moments we barely notice at the time, they all added up to something really memorable. you being there for all of that made a huge difference.
+thank you for being part of my 2025, bryan. genuinely wouldn't be the same without you. you’re a good homie to have around. keep being you!
 
-thank you for treating me like a good friend. i am genuinely grateful that i have met you and everyone else in our circle. y’all are special to me, really, and i hope you feel that. i hope that next year we can create even more ridiculous memories, finish even more tasks, and still find time to just hang out and have fun without worrying about anything else.
+[[IMG:bryanflag.png|1000|1000|bryan flag]]
+(hell yeah bryan holding a flag so joyously)
 
-i manifest 2026 to be a great year for you. i hope it brings good times with maegan, peace and happiness with your parents, and that all the things you have been struggling with finally turn out well. i hope it gives you more laughs than stress, more chill moments than chaos, and all the small little things that make life feel really good.
 
-[[IMG:robgroup.jpg|150|150|trio!]]
-
-hello... hello?? {{special}} goodbye. {{/special}}
-
-- 愛を込めて, Lance <3
-`;
-
+- lance <3
+`
     const rawText = letter.split('\n\n').map(p => ({ text: p + '\n\n', speed: 'normal' }));
     if (rawText[0]) rawText[0].speed = 'slow';
 

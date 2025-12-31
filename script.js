@@ -25,7 +25,7 @@ const allowedNames = [
   "Iron", "Suzy", "Robert", "Bryan", "Cullen", "Teo", "Malas",
   "Vinny", "Ern", "Jalbert", "Ulrich", "Sketch", "Lilly",
   "Siffrin", "Lya", "Kaya", "Remuwel", "Val", "Azzy", "Axo", "Tiz",
-  "Kaz", "Hal", "Akito"
+  "Kaz", "Hal", "Akito", "Maegan", 
 ];
 
 /* ===============================
@@ -39,8 +39,8 @@ const giftPasswords = {
   Iron: "seaweed",
   Suzy: "lovefool",
   Robert: "lilbroski",
-  Bryan: "password4",
-  Cullen: "password5",
+  Bryan: "techyapper",
+  Cullen: "cunningass",
   Teo: "password6",
   Malas: "password7",
   Vinny: "password8",
@@ -49,7 +49,7 @@ const giftPasswords = {
   Ulrich: "password11",
   Sketch: "gay",
   Lilly: "password13",
-  Siffrin: "password14",
+  Siffrin: "imnotgonnasugarcoatit",
   Lya: "password15",
   Kaya: "password16",
   Remuwel: "password17",
@@ -58,7 +58,8 @@ const giftPasswords = {
   Tiz: "password20",
   Kaz: "password21",
   Hal: "password22",
-  Akito: "password23"
+  Akito: "password23",
+  Maegan: "chismist"
 };
 
 /* ===============================
